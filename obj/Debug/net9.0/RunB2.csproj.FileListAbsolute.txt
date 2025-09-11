@@ -1,0 +1,15 @@
+/Users/kaito/Documents/document/hutech/LTwindows/RunB2/bin/Debug/net9.0/RunB2
+/Users/kaito/Documents/document/hutech/LTwindows/RunB2/bin/Debug/net9.0/RunB2.deps.json
+/Users/kaito/Documents/document/hutech/LTwindows/RunB2/bin/Debug/net9.0/RunB2.runtimeconfig.json
+/Users/kaito/Documents/document/hutech/LTwindows/RunB2/bin/Debug/net9.0/RunB2.dll
+/Users/kaito/Documents/document/hutech/LTwindows/RunB2/bin/Debug/net9.0/RunB2.pdb
+/Users/kaito/Documents/document/hutech/LTwindows/RunB2/obj/Debug/net9.0/RunB2.GeneratedMSBuildEditorConfig.editorconfig
+/Users/kaito/Documents/document/hutech/LTwindows/RunB2/obj/Debug/net9.0/RunB2.AssemblyInfoInputs.cache
+/Users/kaito/Documents/document/hutech/LTwindows/RunB2/obj/Debug/net9.0/RunB2.AssemblyInfo.cs
+/Users/kaito/Documents/document/hutech/LTwindows/RunB2/obj/Debug/net9.0/RunB2.csproj.CoreCompileInputs.cache
+/Users/kaito/Documents/document/hutech/LTwindows/RunB2/obj/Debug/net9.0/RunB2.sourcelink.json
+/Users/kaito/Documents/document/hutech/LTwindows/RunB2/obj/Debug/net9.0/RunB2.dll
+/Users/kaito/Documents/document/hutech/LTwindows/RunB2/obj/Debug/net9.0/refint/RunB2.dll
+/Users/kaito/Documents/document/hutech/LTwindows/RunB2/obj/Debug/net9.0/RunB2.pdb
+/Users/kaito/Documents/document/hutech/LTwindows/RunB2/obj/Debug/net9.0/RunB2.genruntimeconfig.cache
+/Users/kaito/Documents/document/hutech/LTwindows/RunB2/obj/Debug/net9.0/ref/RunB2.dll
