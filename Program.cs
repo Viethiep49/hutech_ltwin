@@ -223,3 +223,164 @@ SET TONGTG =
 WHERE EXISTS (SELECT 1 FROM CTHD WHERE CTHD.MAHD = HOADON.MAHD);
 GO
 
+/****************************************************************************************
+ I. SQL CƠ BẢN (CÂU 1 – 11)
+****************************************************************************************/
+
+-- 1. Khách hàng có địa chỉ Tân Bình
+SELECT MaKH, TenKH, DiaChi, DienThoai, Email
+FROM KhachHang
+WHERE DiaChi = N'Tân Bình';
+
+-- 2. Khách hàng chưa có số điện thoại
+SELECT MaKH, TenKH, DiaChi, Email
+FROM KhachHang
+WHERE DienThoai IS NULL OR DienThoai = '';
+
+-- 3. Khách hàng chưa có SDT và chưa có Email
+SELECT MaKH, TenKH, DiaChi
+FROM KhachHang
+WHERE (DienThoai IS NULL OR DienThoai = '')
+  AND (Email IS NULL OR Email = '');
+
+-- 4. Khách hàng có SDT và Email
+SELECT MaKH, TenKH, DiaChi, DienThoai, Email
+FROM KhachHang
+WHERE DienThoai IS NOT NULL AND DienThoai <> ''
+  AND Email IS NOT NULL AND Email <> '';
+
+-- 5. Vật tư có đơn vị tính "Cái"
+SELECT MaVT, TenVT, GiaMua
+FROM VatTu
+WHERE DonViTinh = N'Cái';
+
+-- 6. Vật tư có giá mua > 25000
+SELECT MaVT, TenVT, DonViTinh, GiaMua
+FROM VatTu
+WHERE GiaMua > 25000;
+
+-- 7. Vật tư có tên chứa "Gạch"
+SELECT MaVT, TenVT, DonViTinh, GiaMua
+FROM VatTu
+WHERE TenVT LIKE N'%Gạch%';
+
+-- 8. Giá mua từ 20000 đến 40000
+SELECT MaVT, TenVT, DonViTinh, GiaMua
+FROM VatTu
+WHERE GiaMua BETWEEN 20000 AND 40000;
+
+-- 9. Thông tin hóa đơn + khách hàng
+SELECT HD.MaHD, HD.NgayLapHD, KH.TenKH, KH.DiaChi, KH.DienThoai
+FROM HoaDon AS HD
+JOIN KhachHang AS KH ON HD.MaKH = KH.MaKH;
+
+-- 10. Hóa đơn ngày 25/05/2010
+SELECT HD.MaHD, KH.TenKH, KH.DiaChi, KH.DienThoai
+FROM HoaDon AS HD
+JOIN KhachHang AS KH ON HD.MaKH = KH.MaKH
+WHERE HD.NgayLapHD = '2010-05-25';
+
+-- 11. Hóa đơn trong tháng 06/2010
+SELECT HD.MaHD, HD.NgayLapHD, KH.TenKH, KH.DiaChi, KH.DienThoai
+FROM HoaDon AS HD
+JOIN KhachHang AS KH ON HD.MaKH = KH.MaKH
+WHERE HD.NgayLapHD BETWEEN '2010-06-01' AND '2010-06-30';
+
+
+/****************************************************************************************
+ II. SQL NÂNG CAO – TÍNH TOÁN (CÂU 12 – 20)
+****************************************************************************************/
+
+-- 12. Khách hàng có mua hàng trong tháng 06/2010
+SELECT DISTINCT KH.TenKH, KH.DiaChi, KH.DienThoai
+FROM KhachHang AS KH
+JOIN HoaDon AS HD ON KH.MaKH = HD.MaKH
+WHERE HD.NgayLapHD BETWEEN '2010-06-01' AND '2010-06-30';
+
+-- 13. Khách hàng không mua trong tháng 06/2010
+SELECT TenKH, DiaChi, DienThoai
+FROM KhachHang
+WHERE MaKH NOT IN (
+    SELECT MaKH
+    FROM HoaDon
+    WHERE NgayLapHD BETWEEN '2010-06-01' AND '2010-06-30'
+);
+
+-- 14. Chi tiết hóa đơn + trị giá mua/bán
+SELECT 
+    CTHD.MaHD, CTHD.MaVT, VT.TenVT, VT.DonViTinh,
+    CTHD.GiaBan, VT.GiaMua, CTHD.SoLuong,
+    (VT.GiaMua * CTHD.SoLuong) AS TriGiaMua,
+    (CTHD.GiaBan * CTHD.SoLuong) AS TriGiaBan
+FROM ChiTietHoaDon AS CTHD
+JOIN VatTu AS VT ON CTHD.MaVT = VT.MaVT;
+
+-- 15. Chi tiết hóa đơn có giá bán ≥ giá mua
+SELECT 
+    CTHD.MaHD, CTHD.MaVT, VT.TenVT, VT.DonViTinh,
+    CTHD.GiaBan, VT.GiaMua, CTHD.SoLuong,
+    (VT.GiaMua * CTHD.SoLuong) AS TriGiaMua,
+    (CTHD.GiaBan * CTHD.SoLuong) AS TriGiaBan
+FROM ChiTietHoaDon AS CTHD
+JOIN VatTu AS VT ON CTHD.MaVT = VT.MaVT
+WHERE CTHD.GiaBan >= VT.GiaMua;
+
+-- 16. Chi tiết hóa đơn + khuyến mãi nếu SL > 100
+SELECT 
+    CTHD.MaHD, CTHD.MaVT, VT.TenVT, VT.DonViTinh,
+    CTHD.GiaBan, VT.GiaMua, CTHD.SoLuong,
+    (VT.GiaMua * CTHD.SoLuong) AS TriGiaMua,
+    (CTHD.GiaBan * CTHD.SoLuong) AS TriGiaBan,
+    CASE 
+        WHEN CTHD.SoLuong > 100 THEN CTHD.GiaBan * CTHD.SoLuong * 0.10
+        ELSE 0
+    END AS KhuyenMai
+FROM ChiTietHoaDon AS CTHD
+JOIN VatTu AS VT ON CTHD.MaVT = VT.MaVT;
+
+-- 17. Mặt hàng chưa được bán
+SELECT MaVT, TenVT
+FROM VatTu
+WHERE MaVT NOT IN (
+    SELECT DISTINCT MaVT
+    FROM ChiTietHoaDon
+);
+
+-- 18. Bảng tổng hợp chi tiết hóa đơn
+SELECT 
+    HD.MaHD, HD.NgayLapHD, KH.TenKH, KH.DiaChi, KH.DienThoai,
+    VT.TenVT, VT.DonViTinh, VT.GiaMua,
+    CTHD.GiaBan, CTHD.SoLuong,
+    (VT.GiaMua * CTHD.SoLuong) AS TriGiaMua,
+    (CTHD.GiaBan * CTHD.SoLuong) AS TriGiaBan
+FROM HoaDon AS HD
+JOIN KhachHang AS KH ON HD.MaKH = KH.MaKH
+JOIN ChiTietHoaDon AS CTHD ON HD.MaHD = CTHD.MaHD
+JOIN VatTu AS VT ON CTHD.MaVT = VT.MaVT;
+
+-- 19. Bảng tổng hợp tháng 05/2010
+SELECT 
+    HD.MaHD, HD.NgayLapHD, KH.TenKH, KH.DiaChi, KH.DienThoai,
+    VT.TenVT, VT.DonViTinh, VT.GiaMua,
+    CTHD.GiaBan, CTHD.SoLuong,
+    (VT.GiaMua * CTHD.SoLuong) AS TriGiaMua,
+    (CTHD.GiaBan * CTHD.SoLuong) AS TriGiaBan
+FROM HoaDon AS HD
+JOIN KhachHang AS KH ON HD.MaKH = KH.MaKH
+JOIN ChiTietHoaDon AS CTHD ON HD.MaHD = CTHD.MaHD
+JOIN VatTu AS VT ON CTHD.MaVT = VT.MaVT
+WHERE HD.NgayLapHD BETWEEN '2010-05-01' AND '2010-05-31';
+
+-- 20. Bảng tổng hợp quý I năm 2010
+SELECT 
+    HD.MaHD, HD.NgayLapHD, KH.TenKH, KH.DiaChi, KH.DienThoai,
+    VT.TenVT, VT.DonViTinh, VT.GiaMua,
+    CTHD.GiaBan, CTHD.SoLuong,
+    (VT.GiaMua * CTHD.SoLuong) AS TriGiaMua,
+    (CTHD.GiaBan * CTHD.SoLuong) AS TriGiaBan
+FROM HoaDon AS HD
+JOIN KhachHang AS KH ON HD.MaKH = KH.MaKH
+JOIN ChiTietHoaDon AS CTHD ON HD.MaHD = CTHD.MaHD
+JOIN VatTu AS VT ON CTHD.MaVT = VT.MaVT
+WHERE HD.NgayLapHD BETWEEN '2010-01-01' AND '2010-03-31';
+
