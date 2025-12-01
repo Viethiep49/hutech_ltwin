@@ -525,6 +525,122 @@ LEFT JOIN HOADON HD ON KH.MAKH = HD.MAKH
 GROUP BY KH.MAKH, KH.TENKH, KH.DIACHI
 ORDER BY KH.MAKH;
 
+---------------------------------------------------------
+-- 1. Lấy danh sách khách hàng đã mua hàng trong ngày @Ngay
+---------------------------------------------------------
+CREATE PROCEDURE sp_KhachHang_MuaNgay
+    @Ngay DATE
+AS
+BEGIN
+    SELECT DISTINCT
+        KH.MAKH,
+        KH.TENKH,
+        KH.DIACHI,
+        KH.DT,
+        KH.EMAIL
+    FROM KHACHHANG KH
+    JOIN HOADON HD ON KH.MAKH = HD.MAKH
+    WHERE HD.NGAY = @Ngay;
+END;
+GO
 
+
+---------------------------------------------------------
+-- 2. Lấy danh sách khách hàng có tổng trị giá các đơn hàng lớn hơn @Tong
+---------------------------------------------------------
+CREATE PROCEDURE sp_KhachHang_TongHoaDon
+    @Tong MONEY
+AS
+BEGIN
+    SELECT 
+        KH.MAKH,
+        KH.TENKH,
+        KH.DIACHI,
+        SUM(ISNULL(HD.TONGTG, 0)) AS TongTriGia
+    FROM KHACHHANG KH
+    JOIN HOADON HD ON KH.MAKH = HD.MAKH
+    GROUP BY KH.MAKH, KH.TENKH, KH.DIACHI
+    HAVING SUM(ISNULL(HD.TONGTG, 0)) > @Tong;
+END;
+GO
+
+
+---------------------------------------------------------
+-- 3. Lấy danh sách @TopX khách hàng có tổng trị giá các đơn hàng lớn nhất
+---------------------------------------------------------
+CREATE PROCEDURE sp_TopKhachHang_TongHoaDon
+    @TopX INT
+AS
+BEGIN
+    SELECT TOP (@TopX)
+        KH.MAKH,
+        KH.TENKH,
+        KH.DIACHI,
+        SUM(ISNULL(HD.TONGTG, 0)) AS TongTriGia
+    FROM KHACHHANG KH
+    JOIN HOADON HD ON KH.MAKH = HD.MAKH
+    GROUP BY KH.MAKH, KH.TENKH, KH.DIACHI
+    ORDER BY SUM(ISNULL(HD.TONGTG,0)) DESC;
+END;
+GO
+
+
+---------------------------------------------------------
+-- 4. Lấy danh sách @TopX mặt hàng có số lượng bán lớn nhất
+---------------------------------------------------------
+CREATE PROCEDURE sp_TopMatHang_SLBan
+    @TopX INT
+AS
+BEGIN
+    SELECT TOP (@TopX)
+        VT.MAVT,
+        VT.TENVT,
+        SUM(CT.SL) AS TongSL
+    FROM VATTU VT
+    JOIN CTHD CT ON VT.MAVT = CT.MAVT
+    GROUP BY VT.MAVT, VT.TENVT
+    ORDER BY SUM(CT.SL) DESC;
+END;
+GO
+
+
+---------------------------------------------------------
+-- 5. Lấy danh sách @TopX mặt hàng bán ra có lãi ít nhất
+-- Lãi = GIABAN - GIAMUA
+---------------------------------------------------------
+CREATE PROCEDURE sp_TopMatHang_LaiItNhat
+    @TopX INT
+AS
+BEGIN
+    SELECT TOP (@TopX)
+        VT.MAVT,
+        VT.TENVT,
+        SUM(CT.SL * (CT.GIABAN - VT.GIAMUA)) AS Lai
+    FROM VATTU VT
+    JOIN CTHD CT ON VT.MAVT = CT.MAVT
+    GROUP BY VT.MAVT, VT.TENVT
+    ORDER BY SUM(CT.SL * (CT.GIABAN - VT.GIAMUA)) ASC;
+END;
+GO
+
+
+---------------------------------------------------------
+-- 6. Lấy danh sách @TopX đơn hàng có tổng trị giá lớn nhất
+---------------------------------------------------------
+CREATE PROCEDURE sp_TopHoaDon_TongTriGia
+    @TopX INT
+AS
+BEGIN
+    SELECT TOP (@TopX)
+        HD.MAHD,
+        HD.NGAY,
+        KH.TENKH,
+        KH.DIACHI,
+        HD.TONGTG
+    FROM HOADON HD
+    JOIN KHACHHANG KH ON HD.MAKH = KH.MAKH
+    ORDER BY HD.TONGTG DESC;
+END;
+GO
 
 
