@@ -382,5 +382,149 @@ FROM HoaDon AS HD
 JOIN KhachHang AS KH ON HD.MaKH = KH.MaKH
 JOIN ChiTietHoaDon AS CTHD ON HD.MaHD = CTHD.MaHD
 JOIN VatTu AS VT ON CTHD.MaVT = VT.MaVT
-WHERE HD.NgayLapHD BETWEEN '2010-01-01' AND '2010-03-31';
+WHERE HD.NgayLapHD BETWEEN '2010-01-01' AND '2010----------------------------------------------------------
+-- 21. Danh sách hóa đơn: số HĐ, ngày, tên KH, địa chỉ, tổng trị giá
+---------------------------------------------------------
+SELECT 
+    HD.MAHD,
+    HD.NGAY,
+    KH.TENKH,
+    KH.DIACHI,
+    SUM(CT.SL * CT.GIABAN) AS TONGTRIGIA
+FROM HOADON HD
+JOIN KHACHHANG KH ON HD.MAKH = KH.MAKH
+JOIN CTHD CT ON HD.MAHD = CT.MAHD
+GROUP BY HD.MAHD, HD.NGAY, KH.TENKH, KH.DIACHI;
+
+
+---------------------------------------------------------
+-- 22. Hóa đơn có tổng trị giá lớn nhất
+---------------------------------------------------------
+SELECT TOP 1
+    HD.MAHD,
+    HD.NGAY,
+    KH.TENKH,
+    KH.DIACHI,
+    SUM(CT.SL * CT.GIABAN) AS TONGTRIGIA
+FROM HOADON HD
+JOIN KHACHHANG KH ON HD.MAKH = KH.MAKH
+JOIN CTHD CT ON HD.MAHD = CT.MAHD
+GROUP BY HD.MAHD, HD.NGAY, KH.TENKH, KH.DIACHI
+ORDER BY TONGTRIGIA DESC;
+
+
+---------------------------------------------------------
+-- 23. Hóa đơn có tổng trị giá lớn nhất trong tháng 5/2010
+---------------------------------------------------------
+SELECT TOP 1
+    HD.MAHD,
+    HD.NGAY,
+    KH.TENKH,
+    KH.DIACHI,
+    SUM(CT.SL * CT.GIABAN) AS TONGTRIGIA
+FROM HOADON HD
+JOIN KHACHHANG KH ON HD.MAKH = KH.MAKH
+JOIN CTHD CT ON HD.MAHD = CT.MAHD
+WHERE MONTH(HD.NGAY) = 5 AND YEAR(HD.NGAY) = 2010
+GROUP BY HD.MAHD, HD.NGAY, KH.TENKH, KH.DIACHI
+ORDER BY TONGTRIGIA DESC;
+
+
+---------------------------------------------------------
+-- 24. Đếm số hóa đơn của mỗi khách hàng
+---------------------------------------------------------
+SELECT 
+    KH.MAKH,
+    KH.TENKH,
+    COUNT(HD.MAHD) AS SOHOADON
+FROM KHACHHANG KH
+LEFT JOIN HOADON HD ON KH.MAKH = HD.MAKH
+GROUP BY KH.MAKH, KH.TENKH;
+
+
+---------------------------------------------------------
+-- 25. Đếm hóa đơn theo từng khách hàng, từng tháng
+---------------------------------------------------------
+SELECT 
+    KH.MAKH,
+    KH.TENKH,
+    MONTH(HD.NGAY) AS THANG,
+    YEAR(HD.NGAY) AS NAM,
+    COUNT(HD.MAHD) AS SOHOADON
+FROM KHACHHANG KH
+LEFT JOIN HOADON HD ON KH.MAKH = HD.MAKH
+GROUP BY KH.MAKH, KH.TENKH, MONTH(HD.NGAY), YEAR(HD.NGAY)
+ORDER BY KH.MAKH, NAM, THANG;
+
+
+---------------------------------------------------------
+-- 26. Khách hàng có số lượng hóa đơn nhiều nhất
+---------------------------------------------------------
+SELECT TOP 1
+    KH.MAKH,
+    KH.TENKH,
+    KH.DIACHI,
+    COUNT(HD.MAHD) AS SOHOADON
+FROM KHACHHANG KH
+JOIN HOADON HD ON KH.MAKH = HD.MAKH
+GROUP BY KH.MAKH, KH.TENKH, KH.DIACHI
+ORDER BY SOHOADON DESC;
+
+
+---------------------------------------------------------
+-- 27. Khách hàng có tổng số lượng hàng mua nhiều nhất
+---------------------------------------------------------
+SELECT TOP 1
+    KH.MAKH,
+    KH.TENKH,
+    KH.DIACHI,
+    SUM(CT.SL) AS TONGSL
+FROM KHACHHANG KH
+JOIN HOADON HD ON KH.MAKH = HD.MAKH
+JOIN CTHD CT ON HD.MAHD = CT.MAHD
+GROUP BY KH.MAKH, KH.TENKH, KH.DIACHI
+ORDER BY TONGSL DESC;
+
+
+---------------------------------------------------------
+-- 28. Mặt hàng xuất hiện trong nhiều hóa đơn nhất
+---------------------------------------------------------
+SELECT TOP 1
+    VT.MAVT,
+    VT.TENVT,
+    COUNT(DISTINCT CT.MAHD) AS SOHOADON_XUATHIEN
+FROM VATTU VT
+JOIN CTHD CT ON VT.MAVT = CT.MAVT
+GROUP BY VT.MAVT, VT.TENVT
+ORDER BY SOHOADON_XUATHIEN DESC;
+
+
+---------------------------------------------------------
+-- 29. Mặt hàng được bán với tổng số lượng nhiều nhất
+---------------------------------------------------------
+SELECT TOP 1
+    VT.MAVT,
+    VT.TENVT,
+    SUM(CT.SL) AS TONGSL
+FROM VATTU VT
+JOIN CTHD CT ON VT.MAVT = CT.MAVT
+GROUP BY VT.MAVT, VT.TENVT
+ORDER BY TONGSL DESC;
+
+
+---------------------------------------------------------
+-- 30. Danh sách khách hàng + số lượng hóa đơn (có thể để trống)
+---------------------------------------------------------
+SELECT 
+    KH.MAKH,
+    KH.TENKH,
+    KH.DIACHI,
+    COUNT(HD.MAHD) AS SOHOADON
+FROM KHACHHANG KH
+LEFT JOIN HOADON HD ON KH.MAKH = HD.MAKH
+GROUP BY KH.MAKH, KH.TENKH, KH.DIACHI
+ORDER BY KH.MAKH;
+
+
+
 
